@@ -1,0 +1,84 @@
+{
+  "products": [
+      {
+      "name": "Tin Tile 1",
+      "description": "A tin ceiling tile in artisan silver washed gold.",
+      "sku": "SKU-001",
+      "style": {
+        "color": "artisan silver washed gold",
+        "image": "web/img/sku001.jpg",
+        "style": "drop-in"
+      },
+      "qty": "12",
+      "price": "19.20"
+    },
+    {
+      "name": "Tin Tile 2",
+      "description": "A tin ceiling tile in artisan silver washed pewter.",
+      "sku": "SKU-002",
+      "style": {
+        "color": "artisan silver washed pewter",
+        "image": "web/img/sku002.jpg",
+        "style": "nail-up"
+      },
+      "qty": "0",
+      "price": "25.24"
+    },
+    {
+      "name": "Tin Tile 3",
+      "description": "A tin ceiling tile in artisan silver patina.",
+      "sku": "SKU-003",
+      "style": {
+        "color": "artisan silver patina",
+        "image": "web/img/sku003.jpg",
+        "style": "drop-in"
+      },
+      "qty": "1",
+      "price": "1.52"
+    }, {
+      "name": "Tin Tile 4",
+      "description": "A tin ceiling tile in artisan gold patina.",
+      "sku": "SKU-004",
+      "style": {
+        "color": "artisan gold patina",
+        "image": "web/img/sku004.jpg",
+        "style": "drop-in"
+      },
+      "qty": "2",
+      "price": "5.20"
+    }, {
+      "name": "Tin Tile 5",
+      "description": "A tin ceiling tile in artisan copper patina.",
+      "sku": "SKU-005",
+      "style": {
+        "color": "artisan copper patina",
+        "image": "web/img/sku005.jpg",
+        "style": "snaplock"
+      },
+      "qty": "15",
+      "price": "11.82"
+    }, {
+      "name": "Tin Tile 6",
+      "description": "A tin ceiling tile in artisan espresso patina.",
+      "sku": "SKU-006",
+      "style": {
+        "color": "artisan espresso patina",
+        "image": "web/img/sku006.jpg",
+        "style": "snaplock"
+      },
+      "qty": "10",
+      "price": "12.75"
+    }, {
+      "name": "Tin Tile 7",
+      "description": "A tin ceiling tile in artisan silver with burnt umber.",
+      "sku": "SKU-007",
+      "style": {
+        "color": "artisan silver with burnt umber",
+        "image": "web/img/sku007.jpg",
+        "style": "drop-in"
+      },
+      "qty": "12",
+      "price": "13.99"
+    }
+  ]
+}
