@@ -1,4 +1,6 @@
 import jQuery from "jquery";
+import "../css/styles.css";
+
 window.$ = window.jQuery = jQuery;
 
 // create a Queue
@@ -57,6 +59,28 @@ class Queue {
     let str = "";
     for (let i = 0; i < this.items.length; i++) str += this.items[i] + " ";
     return str;
+  }
+}
+
+class Arrow {
+  constructor(parent, child) {
+    this.parent = parent;
+    this.child = child;
+
+    this.arrow = $(`<div class="arrow"></div>`);
+
+    const parentOffset = this.parent.el[0].getBoundingClientRect();
+    const childOffset = this.child.el[0].getBoundingClientRect();
+
+    const left = parentOffset.right + 10;
+    const top = parentOffset.top + parentOffset.height / 2;
+    const width = childOffset.left - parentOffset.right - 30;
+
+    $("#arrows").append(this.arrow);
+    this.arrow.css("width", width);
+    this.arrow.css("top", top);
+    this.arrow.css("left", left);
+    this.arrow.css("height", "3px");
   }
 }
 
@@ -124,14 +148,25 @@ class Graph {
     nodes
       .sort((a, b) => a.column - b.column)
       .forEach((node) => {
-        console.log(node);
-        console.log(node.key);
         self.queue.enqueue(node.key);
       });
 
     while (!self.queue.isEmpty()) {
       self.dfs(self.queue.front());
     }
+  }
+
+  addArrowsToGraph() {
+    let self = this;
+    $("#graph").append(`<div id="arrows">`);
+
+    self.nodes.forEach((node) => {
+      for (let childKey of node.children) {
+        let child = self.nodes.get(childKey);
+        let arrow = new Arrow(node, child);
+        $("#graph").append(arrow);
+      }
+    });
   }
 
   // function to performs BFS
@@ -153,7 +188,6 @@ class Graph {
 
       // passing the current node to callback function
       // console.log(getQueueElement);
-      debugger;
 
       // get the adjacent list for current node
       let get_List = this.nodes.get(getQueueElement);
@@ -184,10 +218,13 @@ class Graph {
     let node = this.nodes.get(nodeKey);
 
     if (node.parents.length === 0) {
-      $("#graph").append(`<br><span class="node">${node.key} </span>`);
-    } else {
-      $("#graph").append(`<span class="node"> -> ${node.key} </span>`);
+      $("#graph").append(`<br>`);
     }
+
+    let el = $(`<div class="node ${node.color}">${node.key} </div>`);
+    $("#graph").append(el);
+
+    node.el = el;
 
     for (let childKey of node.children) {
       if (this.queue.contains(childKey)) {
@@ -197,7 +234,6 @@ class Graph {
 
     if (node.parents.length) {
       for (let parentKey of node.parents) {
-        debugger;
         if (
           this.nodes.get(parentKey).column === 1 &&
           this.queue.contains(parentKey)
@@ -307,3 +343,4 @@ g.addEdge("liveSource", "playout");
 g.addEdge("liveSource2", "playout");
 
 g.buildGraph();
+g.addArrowsToGraph();

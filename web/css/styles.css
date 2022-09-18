@@ -3,6 +3,10 @@
   box-sizing: border-box;
 }
 
+html {
+  background: #3D3D3D;
+}
+
 header {
   text-align: center;
 }
@@ -64,4 +68,55 @@ header {
   position: relative;
   width: 100%;
   height: 400px;
+}
+
+.node {
+  margin: 30px 100px;
+  padding: 20px 70px;
+  color: white;
+  display: inline-block;
+  position: relative;
+  background: #333333;
+}
+
+.node.green {
+  border: 1px solid #00b300;
+}
+
+.node.red {
+  border: 1px solid #ff0000;
+}
+
+.connection {
+  z-index: 100;
+  height: 10px;
+  position: absolute;
+  background: #fff;
+  border: 2px solid #fff;
+}
+
+.arrows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+
+.arrow {
+  position: absolute;
+  background: white;
+}
+
+.arrow::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  right: -5px;
+  top: -3px;
+  border-top: 5px solid transparent;
+  border-left: 10px solid white;
+  border-bottom: 5px solid transparent;
 }
