@@ -67,20 +67,85 @@ class Arrow {
     this.parent = parent;
     this.child = child;
 
-    this.arrow = $(`<div class="arrow"></div>`);
+    if (!this.parent || !this.child) return;
 
-    const parentOffset = this.parent.el[0].getBoundingClientRect();
-    const childOffset = this.child.el[0].getBoundingClientRect();
+    this.parentOffset = this.parent.el[0].getBoundingClientRect();
+    this.childOffset = this.child.el[0].getBoundingClientRect();
 
-    const left = parentOffset.right + 10;
-    const top = parentOffset.top + parentOffset.height / 2;
-    const width = childOffset.left - parentOffset.right - 30;
+    if (Math.abs(this.parentOffset.top - this.childOffset.top) > 10) {
+      this.makeConnectingLine();
+    } else {
+      this.makeStraightArrow();
+    }
+  }
+
+  makeConnectingLine() {
+    let self = this;
+
+    // debugger;
+
+    this.arrow = $(`<div class="connecting-arrow"></div>`);
+
+    // _| line
+    if (
+      this.parentOffset.top > this.childOffset.top &&
+      this.parentOffset.left < this.childOffset.left
+    ) {
+      const left = self.parentOffset.right + 10;
+      const top = self.childOffset.top + eval(self.childOffset.height / 2);
+      const height = Math.abs(self.parentOffset.top - self.childOffset.top);
+      const width =
+        eval(self.childOffset.left - self.parentOffset.right) / 2 - 20;
+
+      this.arrow.css("top", top);
+      this.arrow.css("left", left);
+      this.arrow.css("width", width);
+      this.arrow.css("height", height);
+      this.arrow.css("border-top", "none");
+      this.arrow.css("border-left", "none");
+      this.arrow.css("border-right", "3px solid #fff");
+      this.arrow.css("border-bottom", "3px solid #fff");
+    }
+
+    // |_ line
+    if (
+      this.parentOffset.top < this.childOffset.top &&
+      this.parentOffset.left < this.childOffset.left
+    ) {
+      const left =
+        self.childOffset.left - 10 - eval(self.childOffset.width / 2);
+      const top = self.parentOffset.top + eval(self.parentOffset.height / 2);
+      const height = Math.abs(self.parentOffset.top - self.childOffset.top);
+      const width =
+        eval(self.childOffset.left - self.parentOffset.right) / 2 - 20;
+
+      this.arrow.css("top", top);
+      this.arrow.css("left", left);
+      this.arrow.css("width", width);
+      this.arrow.css("height", height);
+      this.arrow.css("border-top", "none");
+      this.arrow.css("border-right", "none");
+      this.arrow.css("border-left", "3px solid #fff");
+      this.arrow.css("border-bottom", "3px solid #fff");
+      this.arrow.addClass("has-arrow");
+    }
 
     $("#arrows").append(this.arrow);
+  }
+
+  makeStraightArrow() {
+    let self = this;
+    this.arrow = $(`<div class="arrow"></div>`);
+
+    const left = self.parentOffset.right + 10;
+    const top = self.parentOffset.top + self.parentOffset.height / 2;
+    const width = self.childOffset.left - self.parentOffset.right - 30;
+
     this.arrow.css("width", width);
     this.arrow.css("top", top);
     this.arrow.css("left", left);
     this.arrow.css("height", "3px");
+    $("#arrows").append(this.arrow);
   }
 }
 
@@ -92,6 +157,7 @@ class Graph {
     this.numberOfNodes = nodes.length;
     this.nodes = new Map();
     this.addNodes(nodes);
+    this.row = 0;
   }
 
   // functions to be implemented
@@ -108,6 +174,7 @@ class Graph {
     // null array
     this.nodes.set(v.key, v);
   }
+
   // add edge to the graph
   addEdge(v, w) {
     // get the list for node v and put the
@@ -118,31 +185,9 @@ class Graph {
     // add an edge from w to v also
     this.nodes.get(w).parents.push(v);
   }
-  printGraph() {
-    // get all the vertices
-    let get_keys = this.nodes.keys();
-
-    $("#graph").append("PRINT GRAPH:");
-    // iterate over the vertices
-    for (let key of get_keys) {
-      // great the corresponding adjacency list
-      // for the node
-      let get_values = this.nodes.get(key).children;
-      let conc = "";
-
-      // iterate over the adjacency list
-      // concatenate the values into a string
-      for (let j of get_values) conc += j + " ";
-
-      // print the node and its adjacency list
-      $("#graph").append(`<span class="node">${key} -> ${conc}</span>`);
-    }
-    $("#graph").append("END PRINT GRAPH:");
-  }
 
   buildGraph() {
     let self = this;
-    // self.visited = {};
     self.queue = new Queue();
 
     nodes
@@ -214,15 +259,11 @@ class Graph {
   // all the adjacent node of the node with which it is called
   DFSUtil(nodeKey) {
     this.queue.dequeue(nodeKey);
-
     let node = this.nodes.get(nodeKey);
 
-    if (node.parents.length === 0) {
-      $("#graph").append(`<br>`);
-    }
-
     let el = $(`<div class="node ${node.color}">${node.key} </div>`);
-    $("#graph").append(el);
+    console.log(node.column);
+    $("#graph").find(`.col-${node.column}`).append(el);
 
     node.el = el;
 
@@ -331,6 +372,18 @@ let nodes = [
     parents: [],
     column: 3,
   },
+  {
+    title: "VOD Delivery 2",
+    key: "vod2",
+    data: {
+      id: "vod",
+      value: "VOD Delivery",
+    },
+    color: "red",
+    children: [],
+    parents: [],
+    column: 3,
+  },
 ];
 
 // Using the above implemented graph class
@@ -339,6 +392,7 @@ let g = new Graph(nodes);
 // adding edges
 g.addEdge("fileUpload", "fileIngest");
 g.addEdge("fileIngest", "vod");
+g.addEdge("fileIngest", "vod2");
 g.addEdge("liveSource", "playout");
 g.addEdge("liveSource2", "playout");
 
