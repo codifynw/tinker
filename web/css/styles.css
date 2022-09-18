@@ -87,6 +87,10 @@ header {
   background: #333333;
 }
 
+.node.hidden {
+  visibility: hidden;
+}
+
 .node.green {
   border: 1px solid #00b300;
 }

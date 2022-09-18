@@ -250,6 +250,44 @@ class Graph {
     }
   }
 
+  evenGraphWithEmptyNodes() {
+    let self = this;
+
+    let tallestColumn = Math.max(
+      $(".graph-col.col-1 .node").length,
+      $(".graph-col.col-2 .node").length,
+      $(".graph-col.col-3 .node").length,
+      $(".graph-col.col-4 .node").length
+    );
+
+    for (let i = 0; i < 5; i++) {
+      let nodesInColumn = $(".graph-col.col-" + i + " .node").length;
+      let emptyNodes = tallestColumn - nodesInColumn;
+
+      for (let j = 0; j < emptyNodes; j++) {
+        $(".graph-col.col-" + i).append(
+          `<div class="node hidden">hidden</div>`
+        );
+      }
+    }
+
+    // Another way to do the loop above
+    // for (let i = 0; i < tallestColumn; i++) {
+    //   if ($(".graph-col.col-1 .node").length < tallestColumn) {
+    //     $(".graph-col.col-1").append(`<div class="node hidden">hidden</div>`);
+    //   }
+    //   if ($(".graph-col.col-2 .node").length < tallestColumn) {
+    //     $(".graph-col.col-2").append(`<div class="node hidden">hidden</div>`);
+    //   }
+    //   if ($(".graph-col.col-3 .node").length < tallestColumn) {
+    //     $(".graph-col.col-3").append(`<div class="node hidden">hidden</div>`);
+    //   }
+    //   if ($(".graph-col.col-4 .node").length < tallestColumn) {
+    //     $(".graph-col.col-4").append(`<div class="node hidden">hidden</div>`);
+    //   }
+    // }
+  }
+
   // Main DFS method
   dfs(nodeKey) {
     this.DFSUtil(nodeKey);
@@ -261,8 +299,11 @@ class Graph {
     this.queue.dequeue(nodeKey);
     let node = this.nodes.get(nodeKey);
 
+    if (node.column === 1) {
+      this.evenGraphWithEmptyNodes();
+    }
+
     let el = $(`<div class="node ${node.color}">${node.key} </div>`);
-    console.log(node.column);
     $("#graph").find(`.col-${node.column}`).append(el);
 
     node.el = el;
@@ -384,6 +425,18 @@ let nodes = [
     parents: [],
     column: 3,
   },
+  {
+    title: "VOD Delivery 3",
+    key: "vod3",
+    data: {
+      id: "vod",
+      value: "VOD Delivery",
+    },
+    color: "green",
+    children: [],
+    parents: [],
+    column: 3,
+  },
 ];
 
 // Using the above implemented graph class
@@ -395,6 +448,7 @@ g.addEdge("fileIngest", "vod");
 g.addEdge("fileIngest", "vod2");
 g.addEdge("liveSource", "playout");
 g.addEdge("liveSource2", "playout");
+g.addEdge("playout", "vod3");
 
 g.buildGraph();
 g.addArrowsToGraph();
