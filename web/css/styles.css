@@ -81,6 +81,8 @@ header {
 .node {
   margin: 30px 100px;
   padding: 20px 70px;
+  width: 200px;
+  max-width: 200px;
   color: white;
   display: block;
   position: relative;

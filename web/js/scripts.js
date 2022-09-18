@@ -63,15 +63,20 @@ class Queue {
 }
 
 class Arrow {
-  constructor(parent, child) {
+  constructor(parent, child, columnMeasurements) {
     this.parent = parent;
     this.child = child;
+    this.columnMeasurements = columnMeasurements;
 
     if (!this.parent || !this.child) return;
 
     this.parentOffset = this.parent.el[0].getBoundingClientRect();
     this.childOffset = this.child.el[0].getBoundingClientRect();
 
+    this.drawArrows();
+  }
+
+  drawArrows() {
     if (Math.abs(this.parentOffset.top - this.childOffset.top) > 10) {
       this.makeConnectingLine();
     } else {
@@ -82,20 +87,19 @@ class Arrow {
   makeConnectingLine() {
     let self = this;
 
-    // debugger;
-
     this.arrow = $(`<div class="connecting-arrow"></div>`);
+    const parentCol = this.parent.column;
 
+    // debugger;
     // _| line
     if (
       this.parentOffset.top > this.childOffset.top &&
       this.parentOffset.left < this.childOffset.left
     ) {
-      const left = self.parentOffset.right + 10;
+      const left = self.columnMeasurements[parentCol].arrowStart;
       const top = self.childOffset.top + eval(self.childOffset.height / 2);
       const height = Math.abs(self.parentOffset.top - self.childOffset.top);
-      const width =
-        eval(self.childOffset.left - self.parentOffset.right) / 2 - 20;
+      const width = self.columnMeasurements[parentCol].arrowWidth / 2;
 
       this.arrow.css("top", top);
       this.arrow.css("left", left);
@@ -113,11 +117,12 @@ class Arrow {
       this.parentOffset.left < this.childOffset.left
     ) {
       const left =
-        self.childOffset.left - 10 - eval(self.childOffset.width / 2);
+        self.columnMeasurements[parentCol].arrowWidth / 2 +
+        self.columnMeasurements[parentCol].arrowStart -
+        3;
       const top = self.parentOffset.top + eval(self.parentOffset.height / 2);
       const height = Math.abs(self.parentOffset.top - self.childOffset.top);
-      const width =
-        eval(self.childOffset.left - self.parentOffset.right) / 2 - 20;
+      const width = self.columnMeasurements[parentCol].arrowWidth / 2 - 5;
 
       this.arrow.css("top", top);
       this.arrow.css("left", left);
@@ -205,10 +210,41 @@ class Graph {
     let self = this;
     $("#graph").append(`<div id="arrows">`);
 
+    let columnMeasurements = {};
+    for (let i = 1; i < 5; i++) {
+      columnMeasurements[i] = {};
+
+      columnMeasurements[i].arrowStart =
+        [...document.querySelectorAll(`.col-${i} .node:not([hidden])`)]
+          .reduce((a, b) => {
+            return a.getBoundingClientRect().right >
+              b.getBoundingClientRect().right
+              ? a
+              : b;
+          })
+          .getBoundingClientRect().right + 10;
+
+      if ($(`.col-${i + 1}`).length) {
+        columnMeasurements[i].arrowEnd =
+          [...document.querySelectorAll(`.col-${i + 1} .node:not([hidden])`)]
+            .reduce((a, b) => {
+              return a.getBoundingClientRect().left <
+                b.getBoundingClientRect().left
+                ? a
+                : b;
+            })
+            .getBoundingClientRect().left - 10;
+      }
+
+      columnMeasurements[i].arrowWidth =
+        columnMeasurements[i].arrowEnd - columnMeasurements[i].arrowStart;
+      columnMeasurements[i].halfArrow = columnMeasurements[i].arrowWidth / 2;
+    }
+
     self.nodes.forEach((node) => {
       for (let childKey of node.children) {
         let child = self.nodes.get(childKey);
-        let arrow = new Arrow(node, child);
+        let arrow = new Arrow(node, child, columnMeasurements);
         $("#graph").append(arrow);
       }
     });
@@ -250,7 +286,7 @@ class Graph {
     }
   }
 
-  evenGraphWithEmptyNodes() {
+  levelGraphWithEmptyNodes() {
     let self = this;
 
     let tallestColumn = Math.max(
@@ -300,7 +336,7 @@ class Graph {
     let node = this.nodes.get(nodeKey);
 
     if (node.column === 1) {
-      this.evenGraphWithEmptyNodes();
+      this.levelGraphWithEmptyNodes();
     }
 
     let el = $(`<div class="node ${node.color}">${node.key} </div>`);
@@ -444,11 +480,15 @@ let g = new Graph(nodes);
 
 // adding edges
 g.addEdge("fileUpload", "fileIngest");
+g.addEdge("liveSource3", "fileIngest");
+
 g.addEdge("fileIngest", "vod");
 g.addEdge("fileIngest", "vod2");
+g.addEdge("fileIngest", "vod3");
 g.addEdge("liveSource", "playout");
 g.addEdge("liveSource2", "playout");
-g.addEdge("playout", "vod3");
+g.addEdge("playout", "vod2");
+// g.addEdge("playout", "vod3");
 
 g.buildGraph();
 g.addArrowsToGraph();
