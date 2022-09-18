@@ -16,11 +16,19 @@ class Queue {
     this.items.push(element);
   }
   // dequeue function
-  dequeue() {
+  dequeue(element) {
     // removing element from the queue
     // returns underflow when called
     // on empty queue
     if (this.isEmpty()) return "Underflow";
+
+    if (element) {
+      let index = this.items.indexOf(element);
+      if (index > -1) {
+        return this.items.splice(index, 1)[0];
+      }
+    }
+
     return this.items.shift();
   }
 
@@ -30,6 +38,13 @@ class Queue {
     // the queue without removing it.
     if (this.isEmpty()) return "No elements in Queue";
     return this.items[0];
+  }
+
+  // contains function
+  contains(element) {
+    // returns true if the queue
+    // contains the element
+    return this.items.includes(element);
   }
 
   // isEmpty function
@@ -49,23 +64,30 @@ class Queue {
 class Graph {
   // defining vertex array and
   // adjacent list
-  constructor(noOfVertices) {
-    this.noOfVertices = noOfVertices;
+  constructor(nodes) {
+    this.numberOfNodes = nodes.length;
     this.nodes = new Map();
+    this.addNodes(nodes);
   }
 
   // functions to be implemented
+  addNodes(nodes) {
+    let self = this;
+    for (let i = 0; i < nodes.length; i++) {
+      self.addNode(nodes[i]);
+    }
+  }
 
-  // add vertex to the graph
-  addVertex(v) {
+  // add node to the graph
+  addNode(v) {
     // initialize the adjacent list with a
     // null array
     this.nodes.set(v.key, v);
   }
   // add edge to the graph
   addEdge(v, w) {
-    // get the list for vertex v and put the
-    // vertex w denoting edge between v and w
+    // get the list for node v and put the
+    // node w denoting edge between v and w
     this.nodes.get(v).children.push(w);
 
     // Since graph is undirected,
@@ -80,7 +102,7 @@ class Graph {
     // iterate over the vertices
     for (let key of get_keys) {
       // great the corresponding adjacency list
-      // for the vertex
+      // for the node
       let get_values = this.nodes.get(key).children;
       let conc = "";
 
@@ -88,10 +110,28 @@ class Graph {
       // concatenate the values into a string
       for (let j of get_values) conc += j + " ";
 
-      // print the vertex and its adjacency list
-      $("#graph").append(`<div class="node">${key} -> ${conc}</div>`);
+      // print the node and its adjacency list
+      $("#graph").append(`<span class="node">${key} -> ${conc}</span>`);
     }
     $("#graph").append("END PRINT GRAPH:");
+  }
+
+  buildGraph() {
+    let self = this;
+    // self.visited = {};
+    self.queue = new Queue();
+
+    nodes
+      .sort((a, b) => a.column - b.column)
+      .forEach((node) => {
+        console.log(node);
+        console.log(node.key);
+        self.queue.enqueue(node.key);
+      });
+
+    while (!self.queue.isEmpty()) {
+      self.dfs(self.queue.front());
+    }
   }
 
   // function to performs BFS
@@ -111,11 +151,11 @@ class Graph {
       // get the element from the queue
       let getQueueElement = q.dequeue();
 
-      // passing the current vertex to callback function
+      // passing the current node to callback function
       // console.log(getQueueElement);
       debugger;
 
-      // get the adjacent list for current vertex
+      // get the adjacent list for current node
       let get_List = this.nodes.get(getQueueElement);
 
       // loop through the list and add the element to the
@@ -132,35 +172,46 @@ class Graph {
   }
 
   // Main DFS method
-  dfs(startingNode) {
-    let visited = {};
-
-    let node = this.nodes.get(startingNode);
-    this.DFSUtil(node, visited);
+  dfs(nodeKey) {
+    this.DFSUtil(nodeKey);
   }
 
   // Recursive function which process and explore
-  // all the adjacent vertex of the vertex with which it is called
-  DFSUtil(node, visited) {
-    visited[node.key] = true;
+  // all the adjacent node of the node with which it is called
+  DFSUtil(nodeKey) {
+    this.queue.dequeue(nodeKey);
 
-    $("#graph").append(
-      `<div class="node">${node.key} -> ${node.children}</div>`
-    );
+    let node = this.nodes.get(nodeKey);
 
-    for (let child of node.children) {
-      let childNode = this.nodes.get(child);
-      if (!visited[childNode.key]) {
-        this.DFSUtil(childNode, visited);
+    if (node.parents.length === 0) {
+      $("#graph").append(`<br><span class="node">${node.key} </span>`);
+    } else {
+      $("#graph").append(`<span class="node"> -> ${node.key} </span>`);
+    }
+
+    for (let childKey of node.children) {
+      if (this.queue.contains(childKey)) {
+        this.DFSUtil(childKey);
+      }
+    }
+
+    if (node.parents.length) {
+      for (let parentKey of node.parents) {
+        debugger;
+        if (
+          this.nodes.get(parentKey).column === 1 &&
+          this.queue.contains(parentKey)
+        ) {
+          console.log("jump queue");
+          this.DFSUtil(parentKey);
+        }
       }
     }
   }
 }
 
-// Using the above implemented graph class
-let g = new Graph(6);
 // ADD ALL VERTICES IN WORKFLOW (UNLINKED)
-let vertices = [
+let nodes = [
   {
     title: "File Upload",
     key: "fileUpload",
@@ -175,6 +226,30 @@ let vertices = [
   {
     title: "Live Source 1",
     key: "liveSource",
+    data: {
+      id: "live-source",
+      status: "offline",
+    },
+    color: "red",
+    children: [],
+    parents: [],
+    column: 1,
+  },
+  {
+    title: "Live Source 3",
+    key: "liveSource3",
+    data: {
+      id: "live-source",
+      status: "offline",
+    },
+    color: "green",
+    children: [],
+    parents: [],
+    column: 1,
+  },
+  {
+    title: "Live Source 2",
+    key: "liveSource2",
     data: {
       id: "live-source",
       status: "offline",
@@ -222,35 +297,13 @@ let vertices = [
   },
 ];
 
-// adding vertices
-for (let i = 0; i < vertices.length; i++) {
-  g.addVertex(vertices[i]);
-}
+// Using the above implemented graph class
+let g = new Graph(nodes);
 
 // adding edges
 g.addEdge("fileUpload", "fileIngest");
 g.addEdge("fileIngest", "vod");
 g.addEdge("liveSource", "playout");
+g.addEdge("liveSource2", "playout");
 
-// prints all vertex and
-// its adjacency list
-// A -> B D E
-// B -> A C
-// C -> B E F
-// D -> A E
-// E -> A D F C
-// F -> E C
-
-// g.printGraph();
-// g.bfs("fileUpload");
-// g.dfs("fileUpload");
-
-// loop all vertices with column = 1
-vertices.forEach((vertex) => {
-  if (vertex.column === 1) {
-    console.log(vertex.key);
-    g.dfs(vertex.key);
-  }
-});
-
-// console.log(g.noOfVertices);
+g.buildGraph();
